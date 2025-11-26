@@ -1,0 +1,15 @@
+{
+  "server": {
+    "name": "code-embedding-ai",
+    "version": "1.0.0",
+    "description": "MCP server for AI-powered code search and analysis using vector embeddings"
+  },
+  "api": {
+    "base_url": "http://localhost:8000",
+    "timeout": 30
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "json"
+  }
+}
