@@ -701,7 +701,14 @@ async def read_resource(uri: str) -> str:
 
 async def main():
     """MCP 서버 시작"""
+    import sys
+    import os
+    print(f"[MCP] Starting server from: {os.getcwd()}", file=sys.stderr, flush=True)
+    print(f"[MCP] Python path: {sys.executable}", file=sys.stderr, flush=True)
+    print(f"[MCP] API URL: {config.api.base_url}", file=sys.stderr, flush=True)
+
     async with stdio_server() as (read_stream, write_stream):
+        print(f"[MCP] stdio_server initialized", file=sys.stderr, flush=True)
         await app.run(
             read_stream,
             write_stream,

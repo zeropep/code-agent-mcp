@@ -112,6 +112,23 @@ The server will run in stdio mode, ready for MCP client connections.
 
 Configure in `claude_desktop_config.json`:
 
+**Using virtual environment (Recommended):**
+```json
+{
+  "mcpServers": {
+    "code-embedding-ai": {
+      "command": "/path/to/code-agent-mcp/.venv/Scripts/python.exe",
+      "args": ["-m", "src.server"],
+      "cwd": "/path/to/code-agent-mcp",
+      "env": {
+        "PYTHONPATH": "/path/to/code-agent-mcp"
+      }
+    }
+  }
+}
+```
+
+**Using system Python:**
 ```json
 {
   "mcpServers": {

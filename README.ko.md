@@ -112,6 +112,23 @@ python -m src.server
 
 `claude_desktop_config.json`에서 설정:
 
+**가상환경 사용 시 (권장):**
+```json
+{
+  "mcpServers": {
+    "code-embedding-ai": {
+      "command": "/경로/code-agent-mcp/.venv/Scripts/python.exe",
+      "args": ["-m", "src.server"],
+      "cwd": "/경로/code-agent-mcp",
+      "env": {
+        "PYTHONPATH": "/경로/code-agent-mcp"
+      }
+    }
+  }
+}
+```
+
+**시스템 Python 사용 시:**
 ```json
 {
   "mcpServers": {

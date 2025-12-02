@@ -12,6 +12,18 @@
 
 ### 1. MCP 서버 의존성 설치
 
+**옵션 A: 가상환경 사용 (권장)**
+
+```bash
+cd code-agent-mcp
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+# source .venv/bin/activate  # macOS/Linux
+pip install -r requirements.txt
+```
+
+**옵션 B: 시스템 전역 설치**
+
 ```bash
 cd code-agent-mcp
 pip install -r requirements.txt
@@ -28,15 +40,63 @@ Claude Desktop은 JSON 파일에서 MCP 서버 설정을 읽습니다.
 
 **설정:**
 
+**가상환경 사용 시 (권장):**
+
+```json
+{
+  "mcpServers": {
+    "code-embedding-ai": {
+      "command": "/절대/경로/code-agent-mcp/.venv/Scripts/python.exe",
+      "args": ["-m", "src.server"],
+      "cwd": "/절대/경로/code-agent-mcp",
+      "env": {
+        "PYTHONPATH": "/절대/경로/code-agent-mcp"
+      }
+    }
+  }
+}
+```
+
+**Windows 예시:**
+```json
+{
+  "mcpServers": {
+    "code-embedding-ai": {
+      "command": "C:/bin/work/vector/code-agent-mcp/.venv/Scripts/python.exe",
+      "args": ["-m", "src.server"],
+      "cwd": "C:/bin/work/vector/code-agent-mcp",
+      "env": {
+        "PYTHONPATH": "C:/bin/work/vector/code-agent-mcp"
+      }
+    }
+  }
+}
+```
+
+**macOS/Linux 예시:**
+```json
+{
+  "mcpServers": {
+    "code-embedding-ai": {
+      "command": "/Users/username/code-agent-mcp/.venv/bin/python",
+      "args": ["-m", "src.server"],
+      "cwd": "/Users/username/code-agent-mcp",
+      "env": {
+        "PYTHONPATH": "/Users/username/code-agent-mcp"
+      }
+    }
+  }
+}
+```
+
+**시스템 Python 사용 시:**
+
 ```json
 {
   "mcpServers": {
     "code-embedding-ai": {
       "command": "python",
-      "args": [
-        "-m",
-        "src.server"
-      ],
+      "args": ["-m", "src.server"],
       "cwd": "/절대/경로/code-agent-mcp",
       "env": {
         "PYTHONPATH": "/절대/경로/code-agent-mcp"
@@ -47,8 +107,10 @@ Claude Desktop은 JSON 파일에서 MCP 서버 설정을 읽습니다.
 ```
 
 **중요:**
-- `/절대/경로/code-agent-mcp`를 실제 `code-agent-mcp` 디렉토리의 절대 경로로 변경하세요
-- Windows에서는 이중 백슬래시 사용: `C:\\bin\\work\\vector\\code-agent-mcp`
+- 경로를 실제 `code-agent-mcp` 디렉토리의 절대 경로로 변경하세요
+- 가상환경 사용 시 `.venv` 내의 Python 실행 파일 전체 경로를 사용하세요
+- Windows에서 JSON에는 슬래시(`/`) 또는 이스케이프된 백슬래시(`\\`) 사용
+- 의존성 충돌을 피하기 위해 가상환경 방식을 권장합니다
 
 ### 3. FastAPI 서버 시작
 

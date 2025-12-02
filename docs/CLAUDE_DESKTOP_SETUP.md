@@ -12,6 +12,18 @@ This guide explains how to integrate the code-embedding-ai MCP server with Claud
 
 ### 1. Install MCP Server Dependencies
 
+**Option A: Using Virtual Environment (Recommended)**
+
+```bash
+cd code-agent-mcp
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+# source .venv/bin/activate  # macOS/Linux
+pip install -r requirements.txt
+```
+
+**Option B: System-wide Installation**
+
 ```bash
 cd code-agent-mcp
 pip install -r requirements.txt
@@ -28,15 +40,63 @@ Claude Desktop reads MCP server configurations from a JSON file.
 
 **Configuration:**
 
+**If using virtual environment (Recommended):**
+
+```json
+{
+  "mcpServers": {
+    "code-embedding-ai": {
+      "command": "/absolute/path/to/code-agent-mcp/.venv/Scripts/python.exe",
+      "args": ["-m", "src.server"],
+      "cwd": "/absolute/path/to/code-agent-mcp",
+      "env": {
+        "PYTHONPATH": "/absolute/path/to/code-agent-mcp"
+      }
+    }
+  }
+}
+```
+
+**Windows Example:**
+```json
+{
+  "mcpServers": {
+    "code-embedding-ai": {
+      "command": "C:/bin/work/vector/code-agent-mcp/.venv/Scripts/python.exe",
+      "args": ["-m", "src.server"],
+      "cwd": "C:/bin/work/vector/code-agent-mcp",
+      "env": {
+        "PYTHONPATH": "C:/bin/work/vector/code-agent-mcp"
+      }
+    }
+  }
+}
+```
+
+**macOS/Linux Example:**
+```json
+{
+  "mcpServers": {
+    "code-embedding-ai": {
+      "command": "/Users/username/code-agent-mcp/.venv/bin/python",
+      "args": ["-m", "src.server"],
+      "cwd": "/Users/username/code-agent-mcp",
+      "env": {
+        "PYTHONPATH": "/Users/username/code-agent-mcp"
+      }
+    }
+  }
+}
+```
+
+**If using system-wide Python:**
+
 ```json
 {
   "mcpServers": {
     "code-embedding-ai": {
       "command": "python",
-      "args": [
-        "-m",
-        "src.server"
-      ],
+      "args": ["-m", "src.server"],
       "cwd": "/absolute/path/to/code-agent-mcp",
       "env": {
         "PYTHONPATH": "/absolute/path/to/code-agent-mcp"
@@ -47,8 +107,10 @@ Claude Desktop reads MCP server configurations from a JSON file.
 ```
 
 **Important:**
-- Replace `/absolute/path/to/code-agent-mcp` with the actual absolute path to your `code-agent-mcp` directory
-- On Windows, use double backslashes: `C:\\bin\\work\\vector\\code-agent-mcp`
+- Replace paths with actual absolute paths to your `code-agent-mcp` directory
+- For virtual environment setup, use the full path to the Python executable in `.venv`
+- On Windows, use forward slashes (`/`) or escaped backslashes (`\\`) in JSON
+- The virtual environment approach is recommended to avoid dependency conflicts
 
 ### 3. Start the FastAPI Server
 
