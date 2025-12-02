@@ -46,7 +46,7 @@ async def list_tools():
                     "min_similarity": {
                         "type": "number",
                         "description": "최소 유사도 (0.0-1.0)",
-                        "default": 0.7
+                        "default": 0.5
                     }
                 },
                 "required": ["query"]
