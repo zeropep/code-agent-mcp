@@ -106,6 +106,86 @@ The server will run in stdio mode, ready for MCP client connections.
 - `logging.level`: Log level (DEBUG, INFO, WARNING, ERROR)
 - `logging.format`: Log format (json, text)
 
+## Important: Claude Code Integration
+
+### MCP Tools Exposure in Claude Code
+
+**Current Limitation**: MCP Tools (search_code, find_similar_code, etc.) are **not directly exposed** as callable functions in Claude Code. Only Resources are accessible via `ListMcpResourcesTool` and `ReadMcpResourceTool`.
+
+### Workaround Solutions
+
+#### 1. Use MCP Resources (Basic)
+
+```python
+# List available projects
+ListMcpResourcesTool(server='code-search')
+
+# Get project information
+ReadMcpResourceTool(
+    server='code-search',
+    uri='project://proj_212e9b33ec8e'
+)
+
+# Get project statistics
+ReadMcpResourceTool(
+    server='code-search',
+    uri='project://proj_212e9b33ec8e/stats'
+)
+```
+
+#### 2. Direct FastAPI Calls (Advanced)
+
+Use the helper script provided in `.claude/helpers/code_search.py`:
+
+```bash
+# Search code
+python .claude/helpers/code_search.py search "authentication logic" proj_id 5
+
+# Find similar code
+python .claude/helpers/code_search.py similar "def connect():" python
+
+# Get function implementation
+python .claude/helpers/code_search.py function connect GitMonitor
+
+# List projects
+python .claude/helpers/code_search.py projects
+
+# Get stats
+python .claude/helpers/code_search.py stats proj_212e9b33ec8e
+```
+
+#### 3. Project Configuration
+
+To enable code-search priority in Claude Code projects:
+
+1. **Copy configuration files** to your project:
+   ```bash
+   # Windows
+   .\setup-code-search.ps1 C:\path\to\your\project
+
+   # Linux/Mac
+   ./setup-code-search.sh /path/to/your/project
+   ```
+
+2. **Or manually create** `.claude/settings.local.json`:
+   ```json
+   {
+     "systemInstructions": "When finding or modifying code, FIRST check code-search MCP using ListMcpResourcesTool...",
+     "enableAllProjectMcpServers": true,
+     "enabledMcpjsonServers": ["code-search"],
+     "permissions": {
+       "allow": [
+         "Bash(curl http://localhost:8000/*)",
+         "Bash(python .claude/helpers/code_search.py:*)"
+       ]
+     }
+   }
+   ```
+
+See [QUICK_START_GUIDE.md](../QUICK_START_GUIDE.md) for detailed setup instructions.
+
+---
+
 ## Usage Examples
 
 ### Claude Desktop
@@ -149,7 +229,43 @@ Then in Claude Desktop:
 Find all authentication-related code in my project
 ```
 
-### Claude Code (Programmatic)
+### Claude Code
+
+**Setup for new projects:**
+
+```bash
+# Quick setup (automated)
+cd /path/to/your/project
+/path/to/vector/setup-code-search.sh .
+
+# Or copy configuration manually
+mkdir -p .claude/helpers
+cp /path/to/vector/.claude/settings.local.json .claude/
+cp /path/to/vector/.claude/helpers/code_search.py .claude/helpers/
+```
+
+**Using in Claude Code sessions:**
+
+Since MCP Tools are not directly exposed, use one of these methods:
+
+```bash
+# Method 1: MCP Resources (basic queries)
+# In Claude session, say:
+"List projects in code-search"
+# Claude will use: ListMcpResourcesTool(server='code-search')
+
+# Method 2: Helper script (advanced search)
+# In Claude session, say:
+"Search for 'authentication logic' in code using the helper script"
+# Claude will run: python .claude/helpers/code_search.py search "..." proj_id
+
+# Method 3: Direct API call
+curl -X POST http://localhost:8000/search/semantic \
+  -H "Content-Type: application/json" \
+  -d '{"query": "authentication", "project_id": "proj_id", "top_k": 5}'
+```
+
+**Programmatic usage (MCP SDK):**
 
 ```python
 from mcp import ClientSession, StdioServerParameters
@@ -222,11 +338,18 @@ result = await agent.ainvoke({
 
 ## Documentation
 
-Comprehensive guides available in `docs/`:
+Comprehensive guides available:
 
+- **[Quick Start Guide](../QUICK_START_GUIDE.md)**: Fast setup for new projects ⭐
+- **[Claude Code Setup](docs/CLAUDE_CODE_SETUP.md)**: Complete Claude Code integration guide ⭐
 - **[MCP Server Guide](docs/MCP_SERVER_GUIDE.md)**: Complete API reference and architecture
 - **[Claude Desktop Setup](docs/CLAUDE_DESKTOP_SETUP.md)**: Step-by-step integration guide
 - **[M2 Implementation Plan](M2_MCP_SERVER.md)**: Detailed development roadmap
+
+Project-specific documentation (in `.claude/` after setup):
+
+- **[CODE_SEARCH_USAGE.md](.claude/CODE_SEARCH_USAGE.md)**: Usage patterns and examples
+- **[NEW_DIRECTORY_SETUP.md](.claude/NEW_DIRECTORY_SETUP.md)**: Setting up new projects
 
 ## Examples
 

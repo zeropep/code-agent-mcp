@@ -3,8 +3,10 @@ MCP Server for code-embedding-ai
 """
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
-from typing import Any
+from mcp.server.lowlevel.helper_types import ReadResourceContents
+from typing import Any, Union
 import structlog
+from pydantic import AnyUrl
 from .api_client import FastAPIClient
 from .config import MCPConfig
 
@@ -659,14 +661,27 @@ async def list_resources() -> list[dict]:
 
 
 @app.read_resource()
-async def read_resource(uri: str) -> str:
+async def read_resource(uri: AnyUrl) -> list[ReadResourceContents]:
     """리소스 읽기"""
+    import sys
+    import json
     try:
-        # URI 파싱: project://project_id 또는 project://project_id/stats
-        if not uri.startswith("project://"):
-            raise ValueError(f"Invalid resource URI: {uri}")
+        # URI를 문자열로 변환
+        print(f"[DEBUG] Received URI: {uri}, type: {type(uri)}", file=sys.stderr, flush=True)
 
-        path = uri[len("project://"):]
+        # AnyUrl 객체의 경우 unicode_string() 메서드 사용
+        if hasattr(uri, 'unicode_string'):
+            uri_str = uri.unicode_string()
+        else:
+            uri_str = str(uri)
+
+        print(f"[DEBUG] Converted to string: {uri_str}, type: {type(uri_str)}", file=sys.stderr, flush=True)
+
+        # URI 파싱: project://project_id 또는 project://project_id/stats
+        if not uri_str.startswith("project://"):
+            raise ValueError(f"Invalid resource URI: {uri_str}")
+
+        path = uri_str[len("project://"):]
         parts = path.split("/")
         project_id = parts[0]
 
@@ -680,22 +695,22 @@ async def read_resource(uri: str) -> str:
                     None
                 )
                 if project:
-                    import json
-                    return json.dumps(project, indent=2)
+                    content = json.dumps(project, indent=2)
+                    return [ReadResourceContents(content=content, mime_type="application/json")]
 
             raise ValueError(f"Project not found: {project_id}")
 
         elif len(parts) == 2 and parts[1] == "stats":
             # project://project_id/stats - 프로젝트 통계
             stats_result = await api_client.get_project_stats(project_id)
-            import json
-            return json.dumps(stats_result, indent=2)
+            content = json.dumps(stats_result, indent=2)
+            return [ReadResourceContents(content=content, mime_type="application/json")]
 
         else:
-            raise ValueError(f"Invalid resource path: {uri}")
+            raise ValueError(f"Invalid resource path: {uri_str}")
 
     except Exception as e:
-        logger.error("Failed to read resource", uri=uri, error=str(e))
+        logger.error("Failed to read resource", uri=str(uri), error=str(e))
         raise
 
 
