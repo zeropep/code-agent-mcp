@@ -714,8 +714,8 @@ async def read_resource(uri: AnyUrl) -> list[ReadResourceContents]:
         raise
 
 
-async def main():
-    """MCP 서버 시작"""
+async def run_server():
+    """MCP 서버 비동기 실행"""
     import sys
     import os
     print(f"[MCP] Starting server from: {os.getcwd()}", file=sys.stderr, flush=True)
@@ -731,6 +731,11 @@ async def main():
         )
 
 
-if __name__ == "__main__":
+def main():
+    """MCP 서버 진입점 (entry point for uvx/pip)"""
     import asyncio
-    asyncio.run(main())
+    asyncio.run(run_server())
+
+
+if __name__ == "__main__":
+    main()
